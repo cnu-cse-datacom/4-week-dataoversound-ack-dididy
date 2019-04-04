@@ -38,6 +38,8 @@ def encode_to_sample(chirped_string):
 def is_it_student_num(byte_stream_string):
     if '201704147' in byte_stream_string:
         display(byte_stream_string)
+        exclude_student_num = byte_stream_string.replace('201704147', '')
+        print(exclude_student_num)
         #encode_to_sample()
 
 def stereo_to_mono(input_file, output_file):
