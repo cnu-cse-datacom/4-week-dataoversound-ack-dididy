@@ -13,6 +13,8 @@ from reedsolo import RSCodec, ReedSolomonError
 from termcolor import cprint
 from pyfiglet import figlet_format
 
+import pyaudio
+
 HANDSHAKE_START_HZ = 4096
 HANDSHAKE_END_HZ = 5120 + 1024
 
@@ -21,6 +23,24 @@ STEP_HZ = 256
 BITS = 4
 
 FEC_BYTES = 4
+
+def data_to_sound(encoded_freq):
+    p = pyaudio.PyAudio()
+    stream = p.open(format=pyaudio.paFloat32, channels=1, rate=44100, output=True)
+    
+    stream.write(encoded_freq)
+
+def encode_to_sample(chirped_string):
+    #y(t) = A sin(2πft + ρ) = A sin(ωt + ρ)
+    #encode = 
+    data_to_sound(encode)
+
+def is_it_student_num(byte_stream_string):
+    if '201704147' in byte_stream_string:
+        display(byte_stream_string)
+        exclude_student_num = byte_stream_string.replace('201704147', '')
+        print(exclude_student_num)
+        #encode_to_sample()
 
 def stereo_to_mono(input_file, output_file):
     inp = wave.open(input_file, 'r')
@@ -146,7 +166,8 @@ def listen_linux(frame_rate=44100, interval=0.1):
                 byte_stream = RSCodec(FEC_BYTES).decode(byte_stream)
                 byte_stream = byte_stream.decode("utf-8")
 
-                display(byte_stream)
+                #display(byte_stream)
+                is_it_student_num(byte_stream)
             except ReedSolomonError as e:
                 pass
                 #print("{}: {}".format(e, byte_stream))
