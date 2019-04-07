@@ -30,16 +30,27 @@ def data_to_sound(encoded_freq):
     
     stream.write(encoded_freq)
 
-def encode_to_sample(chirped_string):
+def prepare_to_sample(decoded_string):
     #y(t) = A sin(2πft + ρ) = A sin(ωt + ρ)
-    #encode = 
+    encode = 
     data_to_sound(encode)
+
+def make_it_4bit(processed_string):
+    print(processed_string)
+    to_ascii = [ord(c) for c in processed_string]
+    map(int, to_ascii)
+    print(to_ascii)
+    divide_by_4bit = []
+    for i in range(len(to_ascii)):
+        divide_by_4bit.append(to_ascii[3] // 16)
+        divide_by_4bit.append(to_ascii[3] % 16)
+    encode_to_sample(divide_by_4bit)
+    
 
 def is_it_student_num(byte_stream_string):
     if '201704147' in byte_stream_string:
-        display(byte_stream_string)
         exclude_student_num = byte_stream_string.replace('201704147', '')
-        print(exclude_student_num)
+        make_it_4bit(exclude_student_num)
         #encode_to_sample()
 
 def stereo_to_mono(input_file, output_file):
@@ -85,6 +96,9 @@ def match(freq1, freq2):
     return abs(freq1 - freq2) < 20
 
 def decode_bitchunks(chunk_bits, chunks):
+    print(chunks)
+    print(len(chunks))
+    
     out_bytes = []
 
     next_read_chunk = 0
@@ -166,7 +180,7 @@ def listen_linux(frame_rate=44100, interval=0.1):
                 byte_stream = RSCodec(FEC_BYTES).decode(byte_stream)
                 byte_stream = byte_stream.decode("utf-8")
 
-                #display(byte_stream)
+                display(byte_stream)
                 is_it_student_num(byte_stream)
             except ReedSolomonError as e:
                 pass
