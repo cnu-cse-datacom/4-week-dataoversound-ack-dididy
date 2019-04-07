@@ -24,34 +24,50 @@ BITS = 4
 
 FEC_BYTES = 4
 
-def data_to_sound(encoded_freq):
+
+def data_to_sound(encoded_freq): # This function can generate sound // y(t) = A sin(2πft + ρ) = A sin(ωt + ρ)
     p = pyaudio.PyAudio()
     stream = p.open(format=pyaudio.paFloat32, channels=1, rate=44100, output=True)
-    
-    stream.write(encoded_freq)
 
-def prepare_to_sample(decoded_string):
-    #y(t) = A sin(2πft + ρ) = A sin(ωt + ρ)
-    encode = 
-    data_to_sound(encode)
+#   #y(t) = A sin(2πft + ρ) = A sin(ωt + ρ)
+#   fs = 44100       # sampling rate, Hz, must be integer
+#   duration = 1.0   # in seconds, may be float
+#   f = 440.0        # sine frequency, Hz, may be float
 
-def make_it_4bit(processed_string):
+    # generate samples, note conversion to float32 array
+#   samples = (np.sin(2*np.pi*np.arange(fs*duration)*f/fs)).astype(np.float32)
+
+    sampling_rate = 44100
+    duration = 1.0 
+
+    for i in encoded_freq:
+        samples = (np.sin(2*np.pi*np.arange(sampling_rate*duration)*i/sampling_rate)).astype(np.float32)
+        stream.write(samples)
+
+def calc_frequency(splitted_list): # This function convert frequency to use formular
+    convert_to_freq = [(START_HZ + i * STEP_HZ) for i in splitted_list]
+    convert_to_freq.append(HANDSHAKE_END_HZ)
+    convert_to_freq.insert(0, HANDSHAKE_START_HZ)
+
+    data_to_sound(convert_to_freq)
+
+def make_it_4bit(processed_string): # This function slice each 4bits from ascii(1byte) lists
     print(processed_string)
     to_ascii = [ord(c) for c in processed_string]
     map(int, to_ascii)
-    print(to_ascii)
     divide_by_4bit = []
     for i in range(len(to_ascii)):
-        divide_by_4bit.append(to_ascii[3] // 16)
-        divide_by_4bit.append(to_ascii[3] % 16)
-    encode_to_sample(divide_by_4bit)
-    
+        divide_by_4bit.append(to_ascii[i] // 16)
+        divide_by_4bit.append(to_ascii[i] % 16)
 
-def is_it_student_num(byte_stream_string):
+    calc_frequency(divide_by_4bit)
+    
+def is_it_student_num(byte_stream_string): # This function can make distinction if it's my student number
     if '201704147' in byte_stream_string:
         exclude_student_num = byte_stream_string.replace('201704147', '')
+
         make_it_4bit(exclude_student_num)
-        #encode_to_sample()
+
 
 def stereo_to_mono(input_file, output_file):
     inp = wave.open(input_file, 'r')
@@ -181,7 +197,9 @@ def listen_linux(frame_rate=44100, interval=0.1):
                 byte_stream = byte_stream.decode("utf-8")
 
                 display(byte_stream)
-                is_it_student_num(byte_stream)
+                
+                is_it_student_num(byte_stream) # assignment flag 
+                
             except ReedSolomonError as e:
                 pass
                 #print("{}: {}".format(e, byte_stream))
