@@ -29,30 +29,41 @@ def data_to_sound(encoded_freq): # This function can generate sound // y(t) = A 
     p = pyaudio.PyAudio()
     stream = p.open(format=pyaudio.paFloat32, channels=1, rate=44100, output=True)
 
-#   #y(t) = A sin(2πft + ρ) = A sin(ωt + ρ)
+    #y(t) = A sin(2πft + ρ) = A sin(ωt + ρ)
+#   volume = 0.5     # range [0.0, 1.0]
+
 #   fs = 44100       # sampling rate, Hz, must be integer
 #   duration = 1.0   # in seconds, may be float
 #   f = 440.0        # sine frequency, Hz, may be float
 
     # generate samples, note conversion to float32 array
 #   samples = (np.sin(2*np.pi*np.arange(fs*duration)*f/fs)).astype(np.float32)
+#   stream.write(volume*samples)
 
+    volume = 0.5
     sampling_rate = 44100
     duration = 1.0 
+    
 
     for i in encoded_freq:
         samples = (np.sin(2*np.pi*np.arange(sampling_rate*duration)*i/sampling_rate)).astype(np.float32)
-        stream.write(samples)
+        stream.write(samples*volume)
+    
+    stream.stop_stream()
+    stream.close()
+
+    p.terminate()
 
 def calc_frequency(splitted_list): # This function convert frequency to use formular
     convert_to_freq = [(START_HZ + i * STEP_HZ) for i in splitted_list]
+    convert_to_freq.append(HANDSHAKE_END_HZ)
     convert_to_freq.append(HANDSHAKE_END_HZ)
     convert_to_freq.insert(0, HANDSHAKE_START_HZ)
 
     data_to_sound(convert_to_freq)
 
 def make_it_4bit(processed_string): # This function slice each 4bits from ascii(1byte) lists
-    print(processed_string)
+    byte_stream = RSCodec(FEC_BYTES).encode(processed_string)
     to_ascii = [ord(c) for c in processed_string]
     map(int, to_ascii)
     divide_by_4bit = []
@@ -64,9 +75,12 @@ def make_it_4bit(processed_string): # This function slice each 4bits from ascii(
     
 def is_it_student_num(byte_stream_string): # This function can make distinction if it's my student number
     if '201704147' in byte_stream_string:
+        display(byte_stream_string)
         exclude_student_num = byte_stream_string.replace('201704147', '')
 
         make_it_4bit(exclude_student_num)
+    else:
+        display("Plz include student ID")
 
 
 def stereo_to_mono(input_file, output_file):
@@ -196,7 +210,7 @@ def listen_linux(frame_rate=44100, interval=0.1):
                 byte_stream = RSCodec(FEC_BYTES).decode(byte_stream)
                 byte_stream = byte_stream.decode("utf-8")
 
-                display(byte_stream)
+                #display(byte_stream)
                 
                 is_it_student_num(byte_stream) # assignment flag 
                 
