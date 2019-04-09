@@ -79,8 +79,8 @@ def make_it_4bit(processed_string): # This function slice each 4bits from ascii(
     
 def is_it_student_num(byte_stream_string): # This function can make distinction if it's my student number
     if '201704147' in byte_stream_string:
-        display(byte_stream_string)
         exclude_student_num = byte_stream_string.replace('201704147', '')
+        display(exclude_student_num)
 
         make_it_4bit(exclude_student_num)
     else:
