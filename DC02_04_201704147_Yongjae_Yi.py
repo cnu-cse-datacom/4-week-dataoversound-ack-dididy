@@ -42,12 +42,11 @@ def data_to_sound(encoded_freq): # This function can generate sound // y(t) = A 
 
     volume = 0.5
     sampling_rate = 44100
-    duration = 1.0 
+    duration = 0.5 
     
-
     for i in encoded_freq:
         samples = (np.sin(2*np.pi*np.arange(sampling_rate*duration)*i/sampling_rate)).astype(np.float32)
-        stream.write(samples*volume)
+        stream.write(volume*samples)
     
     stream.stop_stream()
     stream.close()
@@ -126,9 +125,6 @@ def match(freq1, freq2):
     return abs(freq1 - freq2) < 20
 
 def decode_bitchunks(chunk_bits, chunks):
-    print(chunks)
-    print(len(chunks))
-    
     out_bytes = []
 
     next_read_chunk = 0
