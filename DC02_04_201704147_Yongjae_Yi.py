@@ -44,9 +44,11 @@ def data_to_sound(encoded_freq): # This function can generate sound // y(t) = A 
     sampling_rate = 44100
     duration = 0.5 
     
+    print(encoded_freq)
     for i in encoded_freq:
         samples = (np.sin(2*np.pi*np.arange(sampling_rate*duration)*i/sampling_rate)).astype(np.float32)
         stream.write(volume*samples)
+
     
     stream.stop_stream()
     stream.close()
@@ -62,20 +64,23 @@ def calc_frequency(splitted_list): # This function convert frequency to use form
     data_to_sound(convert_to_freq)
 
 def make_it_4bit(processed_string): # This function slice each 4bits from ascii(1byte) lists
-    byte_stream = RSCodec(FEC_BYTES).encode(processed_string)
-    to_ascii = [ord(c) for c in processed_string]
-    map(int, to_ascii)
+    processed_string = processed_string.encode("utf-8")
+    processed_string = RSCodec(FEC_BYTES).encode(processed_string)
+    #to_ascii = [ord(c) for c in processed_string]
+    #map(int, to_ascii)
     divide_by_4bit = []
-    for i in range(len(to_ascii)):
-        divide_by_4bit.append(to_ascii[i] // 16)
-        divide_by_4bit.append(to_ascii[i] % 16)
+    #for i in range(len(to_ascii)):
+    for i in range(len(processed_string)):
+        divide_by_4bit.append(processed_string[i] // 16)
+        divide_by_4bit.append(processed_string[i] % 16)
 
+    print(divide_by_4bit)
     calc_frequency(divide_by_4bit)
     
 def is_it_student_num(byte_stream_string): # This function can make distinction if it's my student number
     if '201704147' in byte_stream_string:
-        display(byte_stream_string)
         exclude_student_num = byte_stream_string.replace('201704147', '')
+        display(exclude_student_num)
 
         make_it_4bit(exclude_student_num)
     else:
@@ -199,6 +204,7 @@ def listen_linux(frame_rate=44100, interval=0.1):
 
         chunk = np.fromstring(data, dtype=np.int16)
         dom = dominant(frame_rate, chunk)
+        #print(dom)
 
         if in_packet and match(dom, HANDSHAKE_END_HZ):
             byte_stream = extract_packet(packet)
